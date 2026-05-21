@@ -19,7 +19,11 @@ namespace StartupPlatform
             {
                 Budget -= amount;
                 startup.CurrentFunding += amount;
-                Console.WriteLine($"{Name} інвестував {amount}$ у {startup.Name}");
+                Console.WriteLine($"\n[УСПІХ] {Name} інвестував {amount}$ у {startup.Name}\n");
+            }
+            else
+            {
+                Console.WriteLine("\n[ПОМИЛКА] Недостатньо коштів!\n");
             }
         }
     }
