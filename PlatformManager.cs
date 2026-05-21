@@ -22,6 +22,8 @@ namespace StartupPlatform
                 Console.WriteLine("2. Переглянути всі стартапи");
                 Console.WriteLine("3. Інвестувати в стартап");
                 Console.WriteLine("4. Зберегти базу у файл");
+                Console.WriteLine("5. Аналітика платформи");
+
                 Console.WriteLine("0. Вийти");
                 Console.Write("Оберіть дію: ");
 
@@ -32,6 +34,10 @@ namespace StartupPlatform
                     case "2": ShowStartups(); break;
                     case "3": InvestMenu(); break;
                     case "4": SaveAll(); break;
+                    case "5":
+                        Console.WriteLine($"Всього стартапів: {PlatformAnalytics.TotalRegisteredStartups}");
+                        Console.WriteLine($"Загальний обсяг інвестицій: {PlatformAnalytics.TotalInvestedMoney}$");
+                        break;
                     case "0": isRunning = false; break;
                     default: Console.WriteLine("Невідома команда."); break;
                 }
@@ -47,6 +53,8 @@ namespace StartupPlatform
 
             startups.Add(new Startup(name, req));
             Console.WriteLine("[УСПІХ] Стартап додано!");
+
+            PlatformAnalytics.RegisterStartup();
         }
 
         private void ShowStartups()
@@ -65,11 +73,13 @@ namespace StartupPlatform
             Console.Write("Введіть номер стартапу для інвестиції: ");
             int index = Convert.ToInt32(Console.ReadLine()) - 1;
 
+
             if (index >= 0 && index < startups.Count)
             {
                 Console.Write("Сума інвестиції ($): ");
                 double amount = Convert.ToDouble(Console.ReadLine());
                 currentInvestor.Invest(startups[index], amount);
+                PlatformAnalytics.RegisterInvestment(amount);
             }
         }
 

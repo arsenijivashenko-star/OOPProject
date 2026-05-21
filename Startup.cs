@@ -3,6 +3,10 @@
     public partial class Startup
     {
         // Вкладений клас
+
+        public string Name { get; set; }
+        public double RequiredFunding { get; set; }
+        public double CurrentFunding { get; set; }
         public class FinancialPlan
         {
             public double EstimatedProfit { get; set; }
