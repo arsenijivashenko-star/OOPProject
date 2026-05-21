@@ -1,50 +1,20 @@
-﻿using System;
-using System.IO;
-
-namespace StartupPlatform
+﻿namespace StartupPlatform
 {
-    public class Startup
+    public partial class Startup
     {
-        private string name;
-        private double requiredFunding;
-        private double currentFunding;
+        // Вкладений клас
+        public class FinancialPlan
+        {
+            public double EstimatedProfit { get; set; }
+            public int MonthsToBreakEven { get; set; }
 
-        public string Name
-        {
-            get { return name; }
-            set { name = value; }
-        }
-        public double RequiredFunding
-        {
-            get { return requiredFunding; }
-            set { requiredFunding = value; }
-        }
-        public double CurrentFunding
-        {
-            get { return currentFunding; }
-            set { currentFunding = value; }
-        }
-
-        public Startup() { }
-
-        public Startup(string name, double requiredFunding)
-        {
-            Name = name;
-            RequiredFunding = requiredFunding;
-            CurrentFunding = 0;
-        }
-
-        public void DisplayInfo()
-        {
-            Console.WriteLine($"Стартап: {Name}, Потрібно: {RequiredFunding}$, Зібрано: {CurrentFunding}$");
-        }
-
-        public void SaveToFile(string filename)
-        {
-            using (StreamWriter sw = new StreamWriter(filename, true))
+            public FinancialPlan(double profit, int months)
             {
-                sw.WriteLine($"Startup: {Name} | Required: {RequiredFunding} | Current: {CurrentFunding}");
+                EstimatedProfit = profit;
+                MonthsToBreakEven = months;
             }
         }
+
+        public FinancialPlan Plan { get; set; }
     }
 }
