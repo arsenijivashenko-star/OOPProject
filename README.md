@@ -1,3 +1,3 @@
 Проєкт з предмету вступ до об'єктно орієнтованого програмування.
 
-Звіт: треба додати
+Звіт: https://sites.google.com/knu.ua/oopprojectarsenijivashenko
