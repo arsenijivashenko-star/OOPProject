@@ -2,39 +2,35 @@
 
 namespace StartupPlatform
 {
-    // Startup наслідує базові властивості від Project
     public class Startup : Project
     {
-        public FinancialPlan Plan { get; set; }
-
         public Startup(string name, double requiredFunding, double currentFunding = 0)
-            : base(name, requiredFunding, currentFunding)
-        {
-        }
+            : base(name, requiredFunding, currentFunding) { }
 
-        public void SetPlan(double profit, int months)
-        {
-            Plan = new FinancialPlan(profit, months);
-            Console.WriteLine($"План для {Name} встановлено: окупність {months} міс.");
-        }
-
-        // Реалізація абстрактного методу базового класу
         public override void DisplayInfo()
         {
-            Console.WriteLine($"- {Name} | Потрібно: {RequiredFunding}$ | Зібрано: {CurrentFunding}$");
+            Console.WriteLine($"[СТАРТАП] {Name} | Потрібно: {RequiredFunding}$ | Зібрано: {CurrentFunding}$");
+        }
+
+        public override string ToCsvRow()
+        {
+            return $"Startup;{Name};{RequiredFunding};{CurrentFunding}";
         }
     }
 
-    // Винесено з тіла Startup для чистоти
-    public class FinancialPlan
+    public class CharityProject : Project
     {
-        public double EstimatedProfit { get; set; }
-        public int MonthsToBreakEven { get; set; }
+        public CharityProject(string name, double requiredFunding, double currentFunding = 0)
+            : base(name, requiredFunding, currentFunding) { }
 
-        public FinancialPlan(double profit, int months)
+        public override void DisplayInfo()
         {
-            EstimatedProfit = profit;
-            MonthsToBreakEven = months;
+            Console.WriteLine($"[БЛАГОДІЙНІСТЬ] {Name} | Ціль: {RequiredFunding}$ | Зібрано: {CurrentFunding}$");
+        }
+
+        public override string ToCsvRow()
+        {
+            return $"Charity;{Name};{RequiredFunding};{CurrentFunding}";
         }
     }
 }
