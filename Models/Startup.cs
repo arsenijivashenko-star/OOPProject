@@ -9,13 +9,10 @@ namespace StartupPlatform
 
         public override void DisplayInfo()
         {
-            Console.WriteLine($"[СТАРТАП] {Name} | Потрібно: {RequiredFunding}$ | Зібрано: {CurrentFunding}$");
+            Console.WriteLine(string.Format(UIManager.Strings.StartupInfo, Name, RequiredFunding, CurrentFunding));
         }
 
-        public override string ToCsvRow()
-        {
-            return $"Startup;{Name};{RequiredFunding};{CurrentFunding}";
-        }
+        public override string ToCsvRow() => $"Startup;{Name};{RequiredFunding};{CurrentFunding}";
     }
 
     public class CharityProject : Project
@@ -25,12 +22,9 @@ namespace StartupPlatform
 
         public override void DisplayInfo()
         {
-            Console.WriteLine($"[БЛАГОДІЙНІСТЬ] {Name} | Ціль: {RequiredFunding}$ | Зібрано: {CurrentFunding}$");
+            Console.WriteLine(string.Format(UIManager.Strings.CharityInfo, Name, RequiredFunding, CurrentFunding));
         }
 
-        public override string ToCsvRow()
-        {
-            return $"Charity;{Name};{RequiredFunding};{CurrentFunding}";
-        }
+        public override string ToCsvRow() => $"Charity;{Name};{RequiredFunding};{CurrentFunding}";
     }
 }

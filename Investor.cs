@@ -21,12 +21,12 @@ namespace StartupPlatform
             {
                 Budget -= amount;
                 project.CurrentFunding += amount;
-                PlatformAnalytics.RegisterInvestment(amount); // Аналітика рахується тут
-                Console.WriteLine($"\n[УСПІХ] {Name} інвестував {amount}$ у {project.Name}\n");
+                // Текст витягується з конфігурації
+                Console.WriteLine(string.Format(UIManager.Strings.SuccessInvested, Name, amount, project.Name));
             }
             else
             {
-                Console.WriteLine("\n[ПОМИЛКА] Недостатньо коштів!\n");
+                Console.WriteLine(UIManager.Strings.ErrorInsufficientFunds);
             }
         }
     }

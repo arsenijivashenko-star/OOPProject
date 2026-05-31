@@ -2,26 +2,26 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 
 namespace StartupPlatform
 {
     public class PlatformManager
     {
-        private List<Project> projects = new List<Project>(); // Тепер тут базовий тип Project!
+        private List<Project> projects = new List<Project>();
         private Investor currentInvestor;
-        private UIConfig ui;
 
-        private const string DbFileName = "db.csv"; // Формат для Excel
+        private const string DbFileName = "db.csv";
         private const string UiFileName = "ui.json";
 
         public void Start()
         {
-            LoadUIStrings();
+            // Завантажуємо всі рядки з файлу ДО того, як виведемо будь-який текст
+            UIManager.Load(UiFileName);
             LoadDatabase();
 
             currentInvestor = new Investor("Головний Інвестор", 500000);
             bool isRunning = true;
+            var ui = UIManager.Strings;
 
             while (isRunning)
             {
@@ -46,26 +46,12 @@ namespace StartupPlatform
             }
         }
 
-        private void LoadUIStrings()
-        {
-            if (File.Exists(UiFileName))
-            {
-                string json = File.ReadAllText(UiFileName);
-                ui = JsonSerializer.Deserialize<UIConfig>(json);
-            }
-            else
-            {
-                Console.WriteLine($"[ПОМИЛКА] {UiFileName} не знайдено!");
-                Environment.Exit(1);
-            }
-        }
-
         private void LoadDatabase()
         {
             if (File.Exists(DbFileName))
             {
                 string[] lines = File.ReadAllLines(DbFileName);
-                for (int i = 1; i < lines.Length; i++) // Починаємо з 1, щоб пропустити заголовок CSV
+                for (int i = 1; i < lines.Length; i++) // Пропуск заголовка
                 {
                     var parts = lines[i].Split(';');
                     if (parts.Length == 4)
@@ -75,60 +61,72 @@ namespace StartupPlatform
                         double req = Convert.ToDouble(parts[2]);
                         double cur = Convert.ToDouble(parts[3]);
 
-                        // Відновлюємо правильний тип об'єкта
                         if (type == "Startup") projects.Add(new Startup(name, req, cur));
                         else if (type == "Charity") projects.Add(new CharityProject(name, req, cur));
                     }
                 }
-                Console.WriteLine($"[СИСТЕМА] Завантажено {projects.Count} проєктів з {DbFileName}.");
+                Console.WriteLine(string.Format(UIManager.Strings.SystemLoaded, projects.Count, DbFileName));
             }
         }
 
         private void SaveDatabase()
         {
-            // Зберігаємо у CSV з BOM (щоб Excel коректно читав українські літери)
             using (StreamWriter sw = new StreamWriter(DbFileName, false, System.Text.Encoding.UTF8))
             {
-                // Заголовок для Excel
                 sw.WriteLine("Type;Name;RequiredFunding;CurrentFunding");
                 foreach (var p in projects)
                 {
                     sw.WriteLine(p.ToCsvRow());
                 }
             }
-            Console.WriteLine($"\n[УСПІХ] Базу даних збережено у {DbFileName} (Можна відкрити в Excel)\n");
+            Console.WriteLine(string.Format(UIManager.Strings.SuccessSaved, DbFileName));
         }
 
         private void AddProjectMenu()
         {
-            Console.WriteLine("1. Комерційний стартап");
-            Console.WriteLine("2. Благодійний проєкт");
-            Console.Write("Оберіть тип: ");
+            var ui = UIManager.Strings;
+            foreach (var item in ui.AddProjectMenu) Console.WriteLine(item);
+
+            Console.Write(ui.SelectTypePrompt);
             string type = Console.ReadLine();
 
-            Console.Write("Назва: ");
+            Console.Write(ui.NamePrompt);
             string name = Console.ReadLine();
-            Console.Write("Необхідна сума ($): ");
 
+            Console.Write(ui.AmountPrompt);
             if (double.TryParse(Console.ReadLine(), out double req))
             {
                 if (type == "1") projects.Add(new Startup(name, req));
                 else if (type == "2") projects.Add(new CharityProject(name, req));
-                else Console.WriteLine("[ПОМИЛКА] Некоректний тип!");
+                else
+                {
+                    Console.WriteLine(ui.ErrorInvalidType);
+                    return;
+                }
 
-                Console.WriteLine("[УСПІХ] Проєкт додано!");
+                Console.WriteLine(ui.SuccessProjectAdded);
+            }
+            else
+            {
+                Console.WriteLine(ui.ErrorInvalidAmount);
             }
         }
 
         private void ShowProjects()
         {
-            Console.WriteLine("\n--- Список проєктів ---");
-            if (projects.Count == 0) Console.WriteLine("Проєктів поки немає.");
+            var ui = UIManager.Strings;
+            Console.WriteLine(ui.ProjectsListTitle);
+
+            if (projects.Count == 0)
+            {
+                Console.WriteLine(ui.NoProjects);
+                return;
+            }
 
             for (int i = 0; i < projects.Count; i++)
             {
                 Console.Write($"{i + 1}. ");
-                projects[i].DisplayInfo(); // Завдяки поліморфізму викличеться правильний метод
+                projects[i].DisplayInfo();
             }
         }
 
@@ -137,28 +135,38 @@ namespace StartupPlatform
             ShowProjects();
             if (projects.Count == 0) return;
 
-            Console.Write("Введіть номер проєкту: ");
+            var ui = UIManager.Strings;
+            Console.Write(ui.InvestProjectNumberPrompt);
+
             if (int.TryParse(Console.ReadLine(), out int index) && index > 0 && index <= projects.Count)
             {
-                Console.Write("Сума інвестиції ($): ");
+                Console.Write(ui.InvestAmountPrompt);
                 if (double.TryParse(Console.ReadLine(), out double amount))
                 {
                     currentInvestor.Invest(projects[index - 1], amount);
                 }
+                else
+                {
+                    Console.WriteLine(ui.ErrorInvalidAmount);
+                }
+            }
+            else
+            {
+                Console.WriteLine(ui.ErrorInvalidProjectNumber);
             }
         }
 
         private void ShowAnalytics()
         {
-            // Використання LINQ для аналітики
+            var ui = UIManager.Strings;
             int totalProjects = projects.Count;
             double totalInvested = projects.Sum(p => p.CurrentFunding);
             int fullyFunded = projects.Count(p => p.CurrentFunding >= p.RequiredFunding);
 
-            Console.WriteLine("\n--- АНАЛІТИКА (LINQ) ---");
-            Console.WriteLine($"Всього проєктів: {totalProjects}");
-            Console.WriteLine($"Загальний обсяг інвестицій: {totalInvested}$");
-            Console.WriteLine($"Успішно профінансованих проєктів: {fullyFunded}");
+            Console.WriteLine(ui.AnalyticsTitle);
+            Console.WriteLine(string.Format(ui.TotalProjects, totalProjects));
+            Console.WriteLine(string.Format(ui.TotalInvested, totalInvested));
+            Console.WriteLine(string.Format(ui.FullyFunded, fullyFunded));
         }
     }
 }
