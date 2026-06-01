@@ -8,7 +8,7 @@ namespace StartupPlatform
     public class PlatformManager
     {
         private List<Project> projects = new List<Project>();
-        private ProjectRepository repo = new ProjectRepository();
+        private ProjectRepository repo;
         private Investor currentInvestor = new Investor("Головний Інвестор", 500000);
         private const string UiFileName = "ui.json";
         private const string LogFileName = "transactions.log";
@@ -16,6 +16,7 @@ namespace StartupPlatform
         public void Start()
         {
             UIManager.Load(UiFileName);
+            repo = new ProjectRepository(UIManager.Strings);
             projects = repo.Load();
 
             // Підписуємо вже завантажені проєкти на подію

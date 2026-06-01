@@ -33,8 +33,8 @@ public class ProjectRepository
             double req = double.Parse(parts[2], CultureInfo.InvariantCulture);
             double cur = double.Parse(parts[3], CultureInfo.InvariantCulture);
 
-            if (type == "Startup") list.Add(new Startup(name, req, cur, _ui));
-            else if (type == "Charity") list.Add(new CharityProject(name, req, cur, _ui));
+            if (type == "Startup") list.Add(new Startup(name, req, cur));
+            else if (type == "Charity") list.Add(new CharityProject(name, req, cur));
         }
 
         Console.WriteLine(string.Format(_ui.SystemLoaded, list.Count, DbFileName));
