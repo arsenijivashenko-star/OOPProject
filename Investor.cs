@@ -13,21 +13,16 @@ namespace StartupPlatform
             Budget = budget;
         }
 
-        // Метод приймає базовий клас Project, тому інвестор зможе
-        // інвестувати у будь-яких нащадків (Startup, Charity, тощо)
         public void Invest(Project project, double amount)
         {
-            if (Budget >= amount)
+            if (Budget < amount)
             {
-                Budget -= amount;
-                project.CurrentFunding += amount;
-                // Текст витягується з конфігурації
-                Console.WriteLine(string.Format(UIManager.Strings.SuccessInvested, Name, amount, project.Name));
+                // Викидаємо власний виняток замість звичайного тексту
+                throw new InsufficientFundsException(UIManager.Strings.ErrorInsufficientFunds);
             }
-            else
-            {
-                Console.WriteLine(UIManager.Strings.ErrorInsufficientFunds);
-            }
+
+            Budget -= amount;
+            project.ReceiveInvestment(amount); // Передаємо гроші в проєкт
         }
     }
 }

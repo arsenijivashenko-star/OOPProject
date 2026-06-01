@@ -32,5 +32,8 @@ namespace StartupPlatform
         public string SuccessInvested { get; set; }
         public string ErrorInsufficientFunds { get; set; }
         public string ErrorInvalidProjectNumber { get; set; }
+        public string ErrorPrefix { get; set; }
+        public string TransactionLogged { get; set; }
+        public string ProjectFundedEvent { get; set; }
     }
 }

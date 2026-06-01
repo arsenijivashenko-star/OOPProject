@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace StartupPlatform
@@ -10,11 +11,18 @@ namespace StartupPlatform
         private ProjectRepository repo = new ProjectRepository();
         private Investor currentInvestor = new Investor("Головний Інвестор", 500000);
         private const string UiFileName = "ui.json";
+        private const string LogFileName = "transactions.log";
 
         public void Start()
         {
             UIManager.Load(UiFileName);
             projects = repo.Load();
+
+            // Підписуємо вже завантажені проєкти на подію
+            foreach (var p in projects)
+            {
+                p.OnFullyFunded += HandleProjectFunded;
+            }
 
             var ui = UIManager.Strings;
             while (true)
@@ -43,6 +51,20 @@ namespace StartupPlatform
             }
         }
 
+        // Обробник події (Delegate handler)
+        private void HandleProjectFunded(string projectName)
+        {
+            Console.WriteLine(string.Format(UIManager.Strings.ProjectFundedEvent, projectName));
+        }
+
+        // Логування транзакцій у файл
+        private void LogTransaction(string investorName, double amount, string projectName)
+        {
+            string logEntry = $"[{DateTime.Now}] {investorName} інвестував {amount}$ у {projectName}.";
+            File.AppendAllText(LogFileName, logEntry + Environment.NewLine);
+            Console.WriteLine(UIManager.Strings.TransactionLogged);
+        }
+
         private void AddProjectMenu()
         {
             var ui = UIManager.Strings;
@@ -57,10 +79,15 @@ namespace StartupPlatform
                 return;
             }
 
-            if (type == "1") projects.Add(new Startup(name, req));
-            else if (type == "2") projects.Add(new CharityProject(name, req));
+            Project newProject = null;
+            if (type == "1") newProject = new Startup(name, req);
+            else if (type == "2") newProject = new CharityProject(name, req);
             else { Console.WriteLine(ui.ErrorInvalidType); return; }
 
+            // Підписка на подію для нових проєктів
+            newProject.OnFullyFunded += HandleProjectFunded;
+
+            projects.Add(newProject);
             Console.WriteLine(ui.SuccessProjectAdded);
         }
 
@@ -88,7 +115,26 @@ namespace StartupPlatform
             {
                 if (ConsoleHelper.TryReadDouble(ui.InvestAmountPrompt, out double amount))
                 {
-                    currentInvestor.Invest(projects[index - 1], amount);
+                    Project selectedProject = projects[index - 1];
+                    try
+                    {
+                        
+                        currentInvestor.Invest(selectedProject, amount);
+
+                      
+                        Console.WriteLine(string.Format(ui.SuccessInvested, currentInvestor.Name, amount, selectedProject.Name));
+                        LogTransaction(currentInvestor.Name, amount, selectedProject.Name);
+                    }
+                    catch (InsufficientFundsException ex)
+                    {
+                        
+                        Console.WriteLine(string.Format(ui.ErrorPrefix, ex.Message));
+                    }
+                    catch (Exception ex)
+                    {
+                        
+                        Console.WriteLine(string.Format(ui.ErrorPrefix, $"Невідома помилка: {ex.Message}"));
+                    }
                 }
                 else Console.WriteLine(ui.ErrorInvalidAmount);
             }
