@@ -22,7 +22,7 @@ namespace StartupPlatform
         public void ReceiveInvestment(double amount)
         {
             CurrentFunding += amount;
-
+            
             // Якщо ціль досягнуто — викликаємо подію (Invoke)
             if (CurrentFunding >= RequiredFunding)
             {

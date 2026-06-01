@@ -1,28 +1,31 @@
 ﻿using System;
+using System.Globalization;
 
-namespace StartupPlatform
+namespace StartupPlatform; // Використання file-scoped namespace
+
+public static class ConsoleHelper
 {
-    public static class ConsoleHelper
+    public static string ReadString(string prompt)
     {
-        // Зчитує рядок із попереднім виведенням підказки
-        public static string ReadString(string prompt)
-        {
-            Console.Write(prompt);
-            return Console.ReadLine();
-        }
+        Console.Write(prompt);
+        return Console.ReadLine() ?? string.Empty;
+    }
 
-        // Безпечно зчитує double
-        public static bool TryReadDouble(string prompt, out double value)
-        {
-            Console.Write(prompt);
-            return double.TryParse(Console.ReadLine(), out value);
-        }
+    public static bool TryReadDouble(string prompt, out double value)
+    {
+        Console.Write(prompt);
+        string input = Console.ReadLine()?.Replace(',', '.') ?? string.Empty; // Заміна коми на крапку
 
-        // Безпечно зчитує int
-        public static bool TryReadInt(string prompt, out int value)
-        {
-            Console.Write(prompt);
-            return int.TryParse(Console.ReadLine(), out value);
-        }
+        return double.TryParse(
+            input,
+            NumberStyles.Any,
+            CultureInfo.InvariantCulture,
+            out value);
+    }
+
+    public static bool TryReadInt(string prompt, out int value)
+    {
+        Console.Write(prompt);
+        return int.TryParse(Console.ReadLine(), out value);
     }
 }
